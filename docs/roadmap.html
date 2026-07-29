@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roadmap | PulseGuard</title>
+  <meta name="description" content="PulseGuard proof-of-concept roadmap.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">P</span>
+      <span>PulseGuard</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="demo.html">Demo</a>
+      <a href="security.html">Security</a>
+      <a href="roadmap.html" aria-current="page">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">Future work</span>
+    <h1>Roadmap</h1>
+    <p class="lead">The next phase should deepen reliability engineering evidence, policy testing, and reproducibility rather than simply adding more autonomous actions.</p>
+  </div>
+</section>
+
+<section class="section compact">
+  <div class="container grid two">
+    <article class="card">
+      <h2>Near term</h2>
+      <ul class="list-clean">
+        <li>complete the personal-laptop clean-room installation test</li>
+        <li>add sanitized screenshots and a short demo recording</li>
+        <li>publish deterministic scenario and recovery tests</li>
+        <li>pin and review third-party dependencies</li>
+        <li>add GitHub Actions for syntax, tests, and Compose validation</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h2>Next</h2>
+      <ul class="list-clean">
+        <li>policy simulation and decision regression tests</li>
+        <li>multi-signal incident correlation</li>
+        <li>change-event and deployment correlation</li>
+        <li>richer support handoff and evidence export</li>
+        <li>model-independent investigation evaluation</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h2>Later</h2>
+      <ul class="list-clean">
+        <li>pluggable observability adapters</li>
+        <li>service ownership and escalation routing</li>
+        <li>replayable incident timelines</li>
+        <li>approval workflows with signed audit events</li>
+        <li>chaos experiments with explicit blast-radius controls</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h2>Not a goal yet</h2>
+      <ul class="list-clean">
+        <li>unrestricted autonomous production remediation</li>
+        <li>large-scale multi-tenant operation</li>
+        <li>processing proprietary or customer data</li>
+        <li>replacing existing incident-management platforms</li>
+        <li>claiming model certainty where evidence is incomplete</li>
+      </ul>
+    </article>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <span>PulseGuard - Predict failures. Protect reliability.</span>
+    <span>Portfolio proof of concept | <span data-year></span></span>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

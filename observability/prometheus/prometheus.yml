@@ -1,0 +1,52 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: checkout-service
+    static_configs:
+      - targets: ["checkout-service:8000"]
+
+  - job_name: payment-router
+    static_configs:
+      - targets: ["payment-router:8000"]
+
+  - job_name: payment-nodes
+    static_configs:
+      - targets:
+          - "payment-node-1:8000"
+          - "payment-node-2:8000"
+          - "payment-node-3:8000"
+
+  - job_name: wikimedia-adapter
+    static_configs:
+      - targets: ["wikimedia-adapter:8000"]
+
+  - job_name: corruption-adapter
+    static_configs:
+      - targets: ["corruption-adapter:8000"]
+
+  - job_name: scenario-controller
+    static_configs:
+      - targets: ["scenario-controller:8000"]
+
+  - job_name: opsai-core
+    static_configs:
+      - targets: ["opsai-core:8000"]
+
+  - job_name: opsai-agent
+    static_configs:
+      - targets: ["opsai-agent:8000"]
+
+  - job_name: opsai-automation
+    static_configs:
+      - targets: ["opsai-automation:8000"]
+
+
+  - job_name: external-auth-service
+    static_configs:
+      - targets: ["external-auth-service:8000"]
+
+  - job_name: opsai-predictor
+    static_configs:
+      - targets: ["opsai-predictor:8000"]

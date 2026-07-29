@@ -1,0 +1,323 @@
+{
+  "documents": [
+    {
+      "id": "runbook-payment-node-latency",
+      "title": "Payment node isolated latency runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_NODE_LATENCY"
+      ],
+      "keywords": [
+        "payment node",
+        "latency",
+        "p95",
+        "outlier",
+        "drain",
+        "capacity",
+        "network"
+      ],
+      "content": "Confirm the affected node is an outlier relative to peer nodes. Check checkout impact and retry rate. If at least two healthy payment nodes remain, collect diagnostics and drain the degraded node from new traffic. Do not restart or rollback without operator approval. Verify customer latency and healthy-node capacity after isolation."
+    },
+    {
+      "id": "runbook-payment-node-timeout",
+      "title": "Payment node timeout and failover runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_NODE_TIMEOUT"
+      ],
+      "keywords": [
+        "timeout",
+        "retry",
+        "failover",
+        "payment node",
+        "dependency",
+        "drain"
+      ],
+      "content": "Confirm retries are isolated to one node and that failover is succeeding. Validate two healthy nodes have capacity. Drain the repeatedly failing node, collect dependency diagnostics, and keep checkout traffic on healthy nodes. Restart or rollback requires approval."
+    },
+    {
+      "id": "runbook-checkout-failure",
+      "title": "Customer checkout failure runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "CHECKOUT_FAILURE_RATE"
+      ],
+      "keywords": [
+        "checkout",
+        "failure",
+        "customer impact",
+        "router",
+        "capacity"
+      ],
+      "content": "Measure customer-visible failure percentage and throughput. Compare router retries and node availability. Do not isolate a node unless evidence identifies it as the cause. Collect diagnostics first when the failure is system-wide."
+    },
+    {
+      "id": "service-topology",
+      "title": "Checkout and payment topology",
+      "kind": "topology",
+      "incidentTypes": [],
+      "keywords": [
+        "checkout",
+        "router",
+        "payment-node-1",
+        "payment-node-2",
+        "payment-node-3",
+        "round robin"
+      ],
+      "content": "Locust sends customer checkouts to Checkout Service. Checkout Service calls Payment Router. Payment Router distributes requests round-robin across three payment nodes. Node 3 is reached through a local network proxy. Nodes 1 and 2 provide remaining capacity if one node is drained."
+    },
+    {
+      "id": "known-error-isolated-latency",
+      "title": "Known error: isolated node latency",
+      "kind": "known_error",
+      "incidentTypes": [
+        "PAYMENT_NODE_LATENCY"
+      ],
+      "keywords": [
+        "isolated latency",
+        "peer normal",
+        "checkout p95",
+        "network path"
+      ],
+      "content": "Signature: one node p95 is materially above peer nodes while retries remain near zero. Customer p95 rises, but approvals remain balanced because round-robin continues sending traffic to the slow node. Likely domains are node-local processing or its network path."
+    },
+    {
+      "id": "history-inc-001",
+      "title": "Historical incident INC-001: node-local network delay",
+      "kind": "historical_incident",
+      "incidentTypes": [
+        "PAYMENT_NODE_LATENCY"
+      ],
+      "keywords": [
+        "historical",
+        "network delay",
+        "drain",
+        "recovery"
+      ],
+      "content": "A single payment node showed p95 above 1.3 seconds while peers stayed below 0.25 seconds. Draining the node restored checkout p95. Root cause was isolated network delay. The node was restored only after diagnostics and clean verification."
+    },
+    {
+      "id": "action-policy",
+      "title": "Controlled action policy",
+      "kind": "policy",
+      "incidentTypes": [],
+      "keywords": [
+        "policy",
+        "approval",
+        "drain",
+        "diagnostics",
+        "restart",
+        "rollback"
+      ],
+      "content": "collect_diagnostics is automatically allowed. drain_payment_node is reversible but requires operator approval. restart_payment_node and rollback_payment_node require explicit approval. Arbitrary shell commands and destructive actions are prohibited."
+    },
+    {
+      "id": "runbook-payment-node-unavailable",
+      "title": "Payment node unavailable runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_NODE_UNAVAILABLE"
+      ],
+      "keywords": [
+        "unavailable",
+        "connection reset",
+        "node down",
+        "failover",
+        "drain",
+        "restore"
+      ],
+      "content": "Confirm the failure is isolated to one payment node and that two peer nodes remain active. Keep the unavailable node out of new traffic, collect read-only node and router diagnostics, and verify customer retry latency. Restart or restore requires operator approval. Do not drain multiple nodes during a correlated fleet event."
+    },
+    {
+      "id": "runbook-payment-node-network-instability",
+      "title": "Intermittent payment-node network instability runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_NODE_NETWORK_INSTABILITY"
+      ],
+      "keywords": [
+        "intermittent",
+        "network",
+        "connection reset",
+        "partial failure",
+        "retry",
+        "diagnostics"
+      ],
+      "content": "Confirm that the same node has both successful and failed calls. Collect transport and node diagnostics first. Drain the node only when instability persists and two healthy peers can carry traffic. Distinguish intermittent failure from complete unavailability and from a shared dependency outage."
+    },
+    {
+      "id": "runbook-payment-node-flapping",
+      "title": "Payment node flapping runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_NODE_FLAPPING"
+      ],
+      "keywords": [
+        "flapping",
+        "availability transitions",
+        "unstable",
+        "quarantine",
+        "drain",
+        "verification"
+      ],
+      "content": "Repeated healthy/unhealthy transitions indicate an unstable node or dependency. Keep the node isolated, collect diagnostics, and require a continuous stable verification period before restore. Avoid repeated restart loops."
+    },
+    {
+      "id": "runbook-shared-payment-dependency",
+      "title": "Shared payment dependency outage runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_SHARED_DEPENDENCY_OUTAGE"
+      ],
+      "keywords": [
+        "shared dependency",
+        "all nodes",
+        "authorisation provider",
+        "fleet outage",
+        "correlated failures"
+      ],
+      "content": "When multiple payment nodes fail with the same downstream signature, create one fleet-scoped incident. Collect dependency diagnostics and use the dependency recovery or failover path. Do not drain individual nodes because the nodes are victims of the shared failure and draining them reduces capacity."
+    },
+    {
+      "id": "runbook-payment-fleet-capacity",
+      "title": "Payment fleet capacity degradation runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_FLEET_CAPACITY_DEGRADATION"
+      ],
+      "keywords": [
+        "traffic surge",
+        "capacity",
+        "all nodes slow",
+        "scale",
+        "load shedding",
+        "rate limit"
+      ],
+      "content": "Correlate fleet-wide latency with aggregate traffic context. If node 3 is unavailable and the two allowlisted peers become slow under elevated demand, recommend scale_payment_capacity for payment-node-1 and payment-node-2. The portfolio executor may automatically increase only bounded application worker-capacity units from one to two; it never uses the Docker socket and never changes host CPU or memory. Verify that peer-node p95 latency returns below the recovery threshold before recording AUTO_REPAIRED. Do not drain a healthy individual node unless separate evidence proves it is an outlier. A surge that remains below latency and failure thresholds is a resilience pass, not a missed incident."
+    },
+    {
+      "id": "policy-ai-action-execution",
+      "title": "AI recommendation and deterministic action policy",
+      "kind": "policy",
+      "incidentTypes": [],
+      "keywords": [
+        "policy",
+        "approval",
+        "execution",
+        "allowlist",
+        "diagnostics",
+        "drain",
+        "blocked"
+      ],
+      "content": "The AI recommends exactly one allowlisted action. The deterministic policy engine independently decides AUTO_ALLOWED, APPROVAL_REQUIRED, BLOCKED, or NO_ACTION. Read-only diagnostic collection may execute automatically. Drain, restart, rollback, scaling, and traffic-control changes are not executed without approval. Multi-node correlated failures block individual-node drain recommendations."
+    },
+    {
+      "id": "runbook-node-disk-pressure",
+      "title": "Runbook: bounded disk pressure and controlled cleanup",
+      "type": "runbook",
+      "tags": [
+        "NODE_DISK_PRESSURE",
+        "disk",
+        "cleanup_disk_space",
+        "Infrastructure Support"
+      ],
+      "content": "For NODE_DISK_PRESSURE on opsai-demo-storage, recommend cleanup_disk_space. Governance may auto-allow only the bounded demo storage paths /data/storage/temp, /data/storage/cache and /data/storage/logs/archive. The executor must create an archive manifest before deletion, reject arbitrary paths, protect current logs/configuration/binaries/certificates/database files, and verify usage remains below the recovery threshold for three checks. Diagnostic collection alone is not a repair. If cleanup fails or is insufficient, assign Infrastructure Support with before/after usage, reclaimed bytes and largest remaining files."
+    },
+    {
+      "id": "runbook-certificate-lifecycle",
+      "title": "Runbook: predictive certificate renewal and failure handoff",
+      "type": "runbook",
+      "tags": [
+        "TLS_CERTIFICATE_EXPIRING",
+        "renew_certificate",
+        "Network & Platform Support"
+      ],
+      "content": "For the allowlisted checkout.pulseguard.local demo certificate issued by PulseGuard Demo Internal CA, recommend renew_certificate before expiry. Validate hostname, SAN, issuer, SSL binding and extended expiry after atomic replacement. Successful renewal plus three verification checks is AUTO_REPAIRED. When renewal fails, do not claim repair: create a Network & Platform Support handoff containing certificate identity, expiry, issuer, renewal error, binding status, recommendation and verification criteria. A backup binding is a temporary workaround requiring approval."
+    },
+    {
+      "id": "policy-auto-repair-verification",
+      "title": "Policy: automatic repair outcome definition",
+      "type": "policy",
+      "tags": [
+        "AUTO_REPAIRED",
+        "governance",
+        "verification"
+      ],
+      "content": "Count AUTO_REPAIRED only when an allowlisted remediation was AUTO_ALLOWED, actually executed, succeeded, independently verified against recovery criteria, and the incident resolved without operator intervention. collect_diagnostics, test cleanup, scenario reset, disturbance expiry, a recommendation without execution, and operator-approved actions do not count as automatic repair. Use AUTO_ACTION_COMPLETED, RECOVERED_AFTER_TEST_CLEANUP, WAITING_FOR_APPROVAL, BLOCKED_BY_GOVERNANCE, MANUAL_INTERVENTION_REQUIRED or OPERATOR_REPAIRED as applicable."
+    },
+    {
+      "id": "policy-support-queue-routing",
+      "title": "Policy: automatic support triage and handoff",
+      "type": "policy",
+      "tags": [
+        "support queue",
+        "L2",
+        "L3",
+        "Infrastructure Support",
+        "Network & Platform Support"
+      ],
+      "content": "When safe repair is unavailable, blocked, approval-required or unsuccessful, PulseGuard prepares a detailed support handoff. Route NODE_DISK_PRESSURE and node availability/capacity issues to Infrastructure Support; transport/TLS issues to Network & Platform Support; shared dependencies to Integration Support; known application procedures to Application Support L2; code defects/regressions or repeated unresolved issues to Application Engineering L3; unclear ownership to Operations Triage; database saturation/locking to Database Support. Include assignment confidence, primary and secondary queue, impact, observed evidence, hypotheses, recommendation, governance, action result and verification criteria."
+    },
+    {
+      "id": "policy-operator-approved-remediation",
+      "title": "Policy: operator-approved payment-node drain",
+      "type": "policy",
+      "tags": [
+        "APPROVAL_REQUIRED",
+        "drain_payment_node",
+        "operator",
+        "governance"
+      ],
+      "content": "A drain_payment_node recommendation is never executed automatically. An operator may approve it from the governed support handoff only when exactly one node is implicated and at least two active peers remain. PulseGuard records the approver, target, router result and timeline. Recovery must still be verified before the outcome becomes OPERATOR_REPAIRED. Rejection leaves the incident assigned to the support queue. Scenario reset restores all router nodes."
+    },
+    {
+      "id": "runbook-external-service-authentication",
+      "title": "External service authentication failure runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "EXTERNAL_SERVICE_AUTHENTICATION_FAILURE"
+      ],
+      "keywords": [
+        "401",
+        "authentication",
+        "bearer token",
+        "credential rotation",
+        "external service",
+        "partner service"
+      ],
+      "content": "Confirm the external endpoint is reachable and that failures are authentication-specific rather than network failures. Compare the checkout token generation with the partner service token generation without exposing the secret. For the allowlisted partner-risk-service demo, refresh the credential through PulseGuard Automation, update only checkout-service through its internal authenticated endpoint, and verify a probe call. Never include the token in logs, incidents, activities, prompts or support handoffs. If the bounded refresh fails, route to Integration Support with token fingerprints, generations and the sanitized error."
+    },
+    {
+      "id": "runbook-payment-worker-hung-restart",
+      "title": "Payment worker hung and bounded restart runbook",
+      "kind": "runbook",
+      "incidentTypes": [
+        "PAYMENT_NODE_HUNG"
+      ],
+      "keywords": [
+        "hung",
+        "deadlock",
+        "restart",
+        "payment node",
+        "worker",
+        "approval"
+      ],
+      "content": "Confirm that the payment service process and health endpoint remain reachable while the worker reports faultMode=hung and requests exceed the router deadline. A restart is a controlled change and requires operator approval. The portfolio executor may call only the payment node's bounded /admin/restart endpoint; it does not use the Docker socket, restart the container or mutate the host. Verify the restart generation increases, faultMode returns to none, acceptingPayments becomes true and payment/retry telemetry recovers."
+    },
+    {
+      "id": "runbook-predictive-operations",
+      "title": "Predictive operations interpretation guide",
+      "kind": "runbook",
+      "incidentTypes": [],
+      "keywords": [
+        "prediction",
+        "forecast",
+        "risk score",
+        "time to threshold",
+        "trend",
+        "preventive"
+      ],
+      "content": "PulseGuard Predictor calculates slopes, risk scores, confidence and time-to-threshold from Prometheus time-series windows. The LLM must not invent or recalculate those numerical values. It explains operational impact, contributing factors and preventive options. Day 5 runs in observation-only mode: no preventive action is automatically authorised or executed. A prediction is distinct from an incident and should be evaluated later as risk reduced, prediction confirmed, incident prevented or false positive."
+    }
+  ]
+}

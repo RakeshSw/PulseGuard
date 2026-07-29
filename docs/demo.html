@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Guide | PulseGuard</title>
+  <meta name="description" content="A guided PulseGuard incident-response demonstration.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">P</span>
+      <span>PulseGuard</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="demo.html" aria-current="page">Demo</a>
+      <a href="security.html">Security</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">Demonstration</span>
+    <h1>Demo guide</h1>
+    <p class="lead">Use one controlled failure to show the full agentic operations loop without hiding the decision and safety boundaries.</p>
+  </div>
+</section>
+
+<section class="section compact">
+  <div class="container">
+    <h2>Before the demo</h2>
+    <ul class="list-clean">
+      <li>Start Docker Desktop and confirm sufficient CPU and memory are available.</li>
+      <li>Run <code>docker compose config --quiet</code>.</li>
+      <li>Start with <code>docker compose up -d --build</code>.</li>
+      <li>Confirm the Incident Console, Investigation page, Prometheus, and Grafana are reachable.</li>
+      <li>Confirm the database starts with no active incidents for a clean presentation.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="kicker">Recommended story</span>
+      <h2>Latency incident from signal to recovery</h2>
+    </div>
+    <div class="grid two">
+      <article class="card">
+        <h3>1. Establish normal state</h3>
+        <p>Show live public activity, the generated Locust profile, healthy detector status, and the distributed payment nodes.</p>
+      </article>
+      <article class="card">
+        <h3>2. Inject a controlled fault</h3>
+        <p>Apply latency or timeout through the supported scenario controls. Explain that the fault is local and synthetic.</p>
+      </article>
+      <article class="card">
+        <h3>3. Confirm detection</h3>
+        <p>Wait for telemetry to confirm the symptom. Avoid presenting a scenario command as an incident until the detector observes impact.</p>
+      </article>
+      <article class="card">
+        <h3>4. Review the investigation</h3>
+        <p>Open the investigation payload, evidence, topology, provider, response, confidence, and proposed action.</p>
+      </article>
+      <article class="card">
+        <h3>5. Explain policy</h3>
+        <p>Show whether the action is automatic, approval required, human only, or denied. Approve only when the demo policy requires it.</p>
+      </article>
+      <article class="card">
+        <h3>6. Verify recovery</h3>
+        <p>Show that PulseGuard measures recovery after the action. Resolution should depend on observed service health, not command success.</p>
+      </article>
+      <article class="card">
+        <h3>7. Close the loop</h3>
+        <p>Review the incident history, action evidence, verification result, resolution, and any support assignment.</p>
+      </article>
+      <article class="card">
+        <h3>8. Reset the scenario</h3>
+        <p>Return the environment to a healthy baseline before the next scenario or screenshot.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>What to say</h2>
+    <div class="callout">
+      "PulseGuard is not just generating a model answer. It observes the system, bounds the investigation evidence, applies policy to the proposed action, executes only approved automation, and verifies recovery before resolution."
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>What not to claim</h2>
+    <ul class="list-clean">
+      <li>Do not describe the proof of concept as production-ready.</li>
+      <li>Do not claim that the AI has unrestricted access or autonomous authority.</li>
+      <li>Do not imply that public Wikimedia content is business traffic.</li>
+      <li>Do not treat synthetic scenario ground truth as investigation evidence.</li>
+      <li>Do not show credentials, private URLs, local usernames, or company-specific data.</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <span>PulseGuard - Predict failures. Protect reliability.</span>
+    <span>Portfolio proof of concept | <span data-year></span></span>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

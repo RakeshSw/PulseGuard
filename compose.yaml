@@ -1,0 +1,599 @@
+name: opsai-commander
+
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-payment-base: &payment-base
+  build:
+    context: ./services/payment-service
+  image: opsai-payment-service:0.6.0
+  restart: unless-stopped
+  logging: *default-logging
+  networks:
+    - opsai-network
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "python",
+        "-c",
+        "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+      ]
+    interval: 5s
+    timeout: 4s
+    retries: 12
+    start_period: 5s
+
+services:
+  payment-node-1:
+    <<: *payment-base
+    container_name: opsai-payment-node-1
+    environment:
+      NODE_ID: payment-node-1
+      SERVICE_VERSION: 0.6.0
+
+  payment-node-2:
+    <<: *payment-base
+    container_name: opsai-payment-node-2
+    environment:
+      NODE_ID: payment-node-2
+      SERVICE_VERSION: 0.6.0
+
+  payment-node-3:
+    <<: *payment-base
+    container_name: opsai-payment-node-3
+    environment:
+      NODE_ID: payment-node-3
+      SERVICE_VERSION: 0.6.0
+
+  wikimedia-adapter:
+    build:
+      context: ./services/wikimedia-adapter
+    image: opsai-wikimedia-adapter:0.4.0
+    container_name: opsai-wikimedia-adapter
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.4.0
+      WIKIMEDIA_STREAM_URL: "${WIKIMEDIA_STREAM_URL:-https://stream.wikimedia.org/v2/stream/recentchange}"
+      WIKIMEDIA_USER_AGENT: "${WIKIMEDIA_USER_AGENT:-PulseGuard/1.0.1-poc}"
+      WIKIMEDIA_TLS_VERIFY: "${WIKIMEDIA_TLS_VERIFY:-true}"
+      WIKIMEDIA_CA_BUNDLE: "${WIKIMEDIA_CA_BUNDLE:-}"
+      WINDOW_SECONDS: "${WIKIMEDIA_WINDOW_SECONDS:-30}"
+      STALE_AFTER_SECONDS: "${WIKIMEDIA_STALE_AFTER_SECONDS:-30}"
+      MIN_USERS: "${TRAFFIC_MIN_USERS:-10}"
+      BASE_USERS: "${TRAFFIC_BASE_USERS:-25}"
+      MAX_USERS: "${TRAFFIC_MAX_USERS:-80}"
+      FALLBACK_USERS: "${TRAFFIC_FALLBACK_USERS:-15}"
+    ports:
+      - "${WIKIMEDIA_ADAPTER_PORT:-8093}:8000"
+    networks:
+      - opsai-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 5s
+
+  corruption-adapter:
+    build:
+      context: ./services/corruption-adapter
+    image: opsai-corruption-adapter:0.4.0
+    container_name: opsai-corruption-adapter
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.4.0
+      UPSTREAM_PROFILE_URL: http://wikimedia-adapter:8000/profile
+      REQUEST_TIMEOUT_SECONDS: 4
+      MAX_TARGET_USERS: "${TRAFFIC_MAX_USERS:-80}"
+    ports:
+      - "${CORRUPTION_ADAPTER_PORT:-8094}:8000"
+    depends_on:
+      wikimedia-adapter:
+        condition: service_healthy
+    networks:
+      - opsai-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 5s
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.12.0
+    container_name: opsai-toxiproxy
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      LOG_LEVEL: info
+    ports:
+      - "${TOXIPROXY_ADMIN_PORT:-8474}:8474"
+    networks:
+      - opsai-network
+
+  scenario-controller:
+    build:
+      context: ./services/scenario-controller
+    image: opsai-scenario-controller:0.6.0
+    container_name: opsai-scenario-controller
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.0
+      TOXIPROXY_API_URL: http://toxiproxy:8474
+      CORRUPTION_ADAPTER_URL: http://corruption-adapter:8000
+      OPSAI_CORE_URL: http://opsai-core:8000
+      OPSAI_AGENT_URL: http://opsai-agent:8000
+      PAYMENT_ROUTER_URL: http://payment-router:8000
+      OPSAI_AUTOMATION_URL: http://opsai-automation:8000
+      OPSAI_PREDICTOR_URL: http://opsai-predictor:8000
+      CHECKOUT_SERVICE_URL: http://checkout-service:8000
+      EXTERNAL_AUTH_SERVICE_URL: http://external-auth-service:8000
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+      TEST_RUN_DATA_FILE: /data/test-runs.json
+      TEST_HISTORY_LIMIT: "20"
+      TEST_PRECONDITION_TIMEOUT_SECONDS: "120"
+      TEST_INVESTIGATION_TIMEOUT_SECONDS: "120"
+      TEST_RECOVERY_TIMEOUT_SECONDS: "120"
+      TEST_POLL_SECONDS: "3"
+      TEST_INCIDENT_SETTLE_SECONDS: "10"
+      TEST_BASELINE_STABLE_EVALUATIONS: "4"
+      TEST_BASELINE_CHECKOUT_FAILURE_PERCENT: "1"
+      TEST_BASELINE_RETRY_RATE: "0.01"
+      TRAFFIC_PROXY_NAME: traffic_profile
+      TRAFFIC_PROXY_LISTEN: 0.0.0.0:8666
+      TRAFFIC_PROXY_UPSTREAM: corruption-adapter:8000
+      PAYMENT_PROXY_NAME: payment_node_3
+      PAYMENT_PROXY_LISTEN: 0.0.0.0:8667
+      PAYMENT_PROXY_UPSTREAM: payment-node-3:8000
+      PAYMENT_NODE_URLS: >-
+        payment-node-1=http://payment-node-1:8000,
+        payment-node-2=http://payment-node-2:8000,
+        payment-node-3=http://payment-node-3:8000
+    volumes:
+      - scenario-test-data:/data
+    ports:
+      - "${SCENARIO_PORT:-8090}:8000"
+    depends_on:
+      toxiproxy:
+        condition: service_started
+      corruption-adapter:
+        condition: service_healthy
+      payment-node-1:
+        condition: service_healthy
+      payment-node-2:
+        condition: service_healthy
+      payment-node-3:
+        condition: service_healthy
+      opsai-automation:
+        condition: service_healthy
+      external-auth-service:
+        condition: service_healthy
+      opsai-predictor:
+        condition: service_healthy
+    networks:
+      - opsai-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 24
+      start_period: 8s
+
+  payment-router:
+    build:
+      context: ./services/payment-router
+    image: opsai-payment-router:0.4.0
+    container_name: opsai-payment-router
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.4.0
+      PAYMENT_NODES: >-
+        payment-node-1=http://payment-node-1:8000,
+        payment-node-2=http://payment-node-2:8000,
+        payment-node-3=http://toxiproxy:8667
+      REQUEST_TIMEOUT_SECONDS: 3
+    ports:
+      - "${PAYMENT_ROUTER_PORT:-8081}:8000"
+    depends_on:
+      payment-node-1:
+        condition: service_healthy
+      payment-node-2:
+        condition: service_healthy
+      payment-node-3:
+        condition: service_healthy
+      scenario-controller:
+        condition: service_healthy
+    networks:
+      - opsai-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 5s
+
+  external-auth-service:
+    build:
+      context: ./services/external-auth-service
+    image: opsai-external-auth-service:0.6.0
+    container_name: opsai-external-auth-service
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.0
+      EXTERNAL_SERVICE_NAME: partner-risk-service
+      EXTERNAL_AUTH_INITIAL_TOKEN: "${EXTERNAL_AUTH_INITIAL_TOKEN:?Set EXTERNAL_AUTH_INITIAL_TOKEN in .env}"
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+    ports:
+      - "${EXTERNAL_AUTH_PORT:-8099}:8000"
+    networks:
+      - opsai-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 5s
+
+  checkout-service:
+    build:
+      context: ./services/checkout-service
+    image: opsai-checkout-service:0.6.0
+    container_name: opsai-checkout-service
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.0
+      PAYMENT_ROUTER_URL: http://payment-router:8000
+      REQUEST_TIMEOUT_SECONDS: 8
+      EXTERNAL_AUTH_SERVICE_URL: http://external-auth-service:8000
+      EXTERNAL_AUTH_SERVICE_NAME: partner-risk-service
+      EXTERNAL_AUTH_TOKEN: "${EXTERNAL_AUTH_INITIAL_TOKEN:?Set EXTERNAL_AUTH_INITIAL_TOKEN in .env}"
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+    ports:
+      - "${CHECKOUT_PORT:-8080}:8000"
+    depends_on:
+      payment-router:
+        condition: service_healthy
+      external-auth-service:
+        condition: service_healthy
+    networks:
+      - opsai-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+        ]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 5s
+
+  load-generator:
+    build:
+      context: ./load-generator
+    image: opsai-load-generator:0.4.0
+    container_name: opsai-load-generator
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      CHECKOUT_URL: http://checkout-service:8000
+      TRAFFIC_MODE: "${TRAFFIC_MODE:-wikimedia}"
+      TRAFFIC_PROFILE_URL: http://toxiproxy:8666/profile
+      TRAFFIC_PROFILE_POLL_SECONDS: "${TRAFFIC_PROFILE_POLL_SECONDS:-5}"
+      TRAFFIC_FALLBACK_USERS: "${TRAFFIC_FALLBACK_USERS:-15}"
+      TRAFFIC_MAX_USERS: "${TRAFFIC_MAX_USERS:-80}"
+      TRAFFIC_SPAWN_RATE: "${TRAFFIC_SPAWN_RATE:-10}"
+      LOCUST_MIN_WAIT_SECONDS: 1
+      LOCUST_MAX_WAIT_SECONDS: 3
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        locust -f /app/locustfile.py
+        --host "$${CHECKOUT_URL}"
+        --web-host 0.0.0.0
+        --web-port 8089
+        --autostart
+    ports:
+      - "${LOCUST_PORT:-8089}:8089"
+    depends_on:
+      checkout-service:
+        condition: service_healthy
+      scenario-controller:
+        condition: service_healthy
+    networks:
+      - opsai-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: opsai-postgres
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:-opsai}"
+      POSTGRES_USER: "${POSTGRES_USER:-opsai}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - opsai-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 5s
+
+  opsai-automation:
+    build:
+      context: ./services/opsai-automation
+    image: opsai-automation:0.6.0
+    container_name: opsai-automation
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.0
+      OPSAI_CORE_URL: http://opsai-core:8000
+      OPSAI_AGENT_URL: http://opsai-agent:8000
+      SCENARIO_CONTROLLER_URL: http://scenario-controller:8000
+      PAYMENT_ROUTER_URL: http://payment-router:8000
+      CHECKOUT_SERVICE_URL: http://checkout-service:8000
+      EXTERNAL_AUTH_SERVICE_URL: http://external-auth-service:8000
+      PAYMENT_NODE_URLS: >-
+        payment-node-1=http://payment-node-1:8000,
+        payment-node-2=http://payment-node-2:8000,
+        payment-node-3=http://payment-node-3:8000
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+      AUTOMATION_DATA_ROOT: /data
+      VIRTUAL_DISK_CAPACITY_BYTES: "${VIRTUAL_DISK_CAPACITY_BYTES:-167772160}"
+      DISK_OPEN_PERCENT: "${DISK_OPEN_PERCENT:-85}"
+      DISK_RECOVERY_PERCENT: "${DISK_RECOVERY_PERCENT:-70}"
+      CERT_OPEN_SECONDS: "${CERT_OPEN_SECONDS:-900}"
+      AUTOMATION_MONITOR_SECONDS: "${AUTOMATION_MONITOR_SECONDS:-3}"
+      DEMO_CERT_HOSTNAME: "${DEMO_CERT_HOSTNAME:-checkout.pulseguard.local}"
+      SLA_RISK_SECONDS: "${SLA_RISK_SECONDS:-300}"
+      SUPPORT_HANDOFF_DELAY_SECONDS: "${SUPPORT_HANDOFF_DELAY_SECONDS:-180}"
+    volumes:
+      - automation-data:/data
+    ports:
+      - "${OPSAI_AUTOMATION_PORT:-8097}:8000"
+    networks:
+      - opsai-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 8s
+
+  opsai-core:
+    build:
+      context: ./services/opsai-core
+    image: opsai-core:0.6.0
+    container_name: opsai-core
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.1
+      PROMETHEUS_URL: http://prometheus:9090
+      OPSAI_AGENT_URL: http://opsai-agent:8000
+      OPSAI_CORE_URL: http://opsai-core:8000
+      OPSAI_AUTOMATION_URL: http://opsai-automation:8000
+      EXTERNAL_AUTH_SERVICE_URL: http://external-auth-service:8000
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+      WIKIMEDIA_PROFILE_URL: http://wikimedia-adapter:8000/profile
+      TRAFFIC_PROFILE_URL: http://corruption-adapter:8000/profile
+      PAYMENT_NODE_URLS: >-
+        payment-node-1=http://payment-node-1:8000,
+        payment-node-2=http://payment-node-2:8000,
+        payment-node-3=http://payment-node-3:8000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-opsai}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-opsai}
+      EVALUATION_INTERVAL_SECONDS: "${DETECTOR_EVALUATION_SECONDS:-5}"
+      LATENCY_OPEN_SECONDS: "${LATENCY_OPEN_SECONDS:-0.8}"
+      LATENCY_RECOVERY_SECONDS: "${LATENCY_RECOVERY_SECONDS:-0.45}"
+      LATENCY_OPEN_EVALUATIONS: "${LATENCY_OPEN_EVALUATIONS:-3}"
+      LATENCY_CLOSE_EVALUATIONS: "${LATENCY_CLOSE_EVALUATIONS:-4}"
+      RETRY_OPEN_RATE: "${RETRY_OPEN_RATE:-0.05}"
+      RETRY_RECOVERY_RATE: "${RETRY_RECOVERY_RATE:-0.01}"
+      RETRY_OPEN_EVALUATIONS: "${RETRY_OPEN_EVALUATIONS:-2}"
+      RETRY_CLOSE_EVALUATIONS: "${RETRY_CLOSE_EVALUATIONS:-4}"
+      FLAPPING_HOLD_DOWN_SECONDS: "${FLAPPING_HOLD_DOWN_SECONDS:-18}"
+    ports:
+      - "${OPSAI_CORE_PORT:-8095}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    networks:
+      - opsai-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 10s
+
+  opsai-agent:
+    build:
+      context: ./services/opsai-agent
+    image: opsai-agent:0.6.0
+    container_name: opsai-agent
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.0
+      OPSAI_CORE_URL: http://opsai-core:8000
+      OPSAI_AUTOMATION_URL: http://opsai-automation:8000
+      CHECKOUT_SERVICE_URL: http://checkout-service:8000
+      EXTERNAL_AUTH_SERVICE_URL: http://external-auth-service:8000
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+      PROMETHEUS_URL: http://prometheus:9090
+      TRAFFIC_PROFILE_URL: http://corruption-adapter:8000/profile
+      PAYMENT_ROUTER_URL: http://payment-router:8000
+      PAYMENT_NODE_URLS: >-
+        payment-node-1=http://payment-node-1:8000,
+        payment-node-2=http://payment-node-2:8000,
+        payment-node-3=http://payment-node-3:8000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-opsai}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-opsai}
+      KNOWLEDGE_DIR: /app/knowledge
+      AGENT_POLL_INTERVAL_SECONDS: "${AGENT_POLL_INTERVAL_SECONDS:-5}"
+      LLM_PROVIDER: "${LLM_PROVIDER:-mock}"
+      LLM_TIMEOUT_SECONDS: "${LLM_TIMEOUT_SECONDS:-45}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL:-https://api.openai.com/v1}"
+      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-5-mini}"
+      AZURE_OPENAI_ENDPOINT: "${AZURE_OPENAI_ENDPOINT:-}"
+      AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY:-}"
+      AZURE_OPENAI_DEPLOYMENT: "${AZURE_OPENAI_DEPLOYMENT:-}"
+    ports:
+      - "${OPSAI_AGENT_PORT:-8096}:8000"
+    depends_on:
+      opsai-core:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+      opsai-automation:
+        condition: service_healthy
+    networks:
+      - opsai-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 10s
+
+  opsai-predictor:
+    build:
+      context: ./services/opsai-predictor
+    image: opsai-predictor:0.6.1
+    container_name: opsai-predictor
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      SERVICE_VERSION: 0.6.1
+      PROMETHEUS_URL: http://prometheus:9090
+      OPSAI_AGENT_URL: http://opsai-agent:8000
+      OPSAI_CORE_URL: http://opsai-core:8000
+      AUTOMATION_API_TOKEN: "${AUTOMATION_API_TOKEN:?Set AUTOMATION_API_TOKEN in .env}"
+      PREDICTOR_POLL_SECONDS: "${PREDICTOR_POLL_SECONDS:-15}"
+      PREDICTOR_RANGE_WINDOW_SECONDS: "${PREDICTOR_RANGE_WINDOW_SECONDS:-900}"
+      PREDICTOR_RANGE_STEP_SECONDS: "${PREDICTOR_RANGE_STEP_SECONDS:-15}"
+      PREDICTOR_MIN_SAMPLES: "${PREDICTOR_MIN_SAMPLES:-12}"
+      PREDICTOR_RECURRENCE_LOOKBACK_HOURS: "${PREDICTOR_RECURRENCE_LOOKBACK_HOURS:-24}"
+      PREDICTOR_RECURRENCE_THRESHOLD: "${PREDICTOR_RECURRENCE_THRESHOLD:-2}"
+      PREDICTOR_RECURRENCE_EVALUATION_SECONDS: "${PREDICTOR_RECURRENCE_EVALUATION_SECONDS:-60}"
+      PREDICTOR_DISK_HORIZON_SECONDS: "${PREDICTOR_DISK_HORIZON_SECONDS:-1800}"
+      PREDICTOR_LATENCY_HORIZON_SECONDS: "${PREDICTOR_LATENCY_HORIZON_SECONDS:-900}"
+    ports:
+      - "${OPSAI_PREDICTOR_PORT:-8098}:8000"
+    depends_on:
+      prometheus:
+        condition: service_started
+      opsai-agent:
+        condition: service_healthy
+    networks:
+      - opsai-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:v3.13.0
+    container_name: opsai-prometheus
+    restart: unless-stopped
+    logging: *default-logging
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=2d
+      - --storage.tsdb.retention.size=1GB
+      - --web.enable-lifecycle
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - opsai-network
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: opsai-grafana
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:-admin}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - opsai-network
+
+networks:
+  opsai-network:
+    name: opsai-network
+    driver: bridge
+
+volumes:
+  scenario-test-data:
+  prometheus-data:
+  grafana-data:
+  postgres-data:
+  automation-data:

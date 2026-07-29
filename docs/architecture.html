@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture | PulseGuard</title>
+  <meta name="description" content="PulseGuard system architecture and service boundaries.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">P</span>
+      <span>PulseGuard</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html" aria-current="page">Architecture</a>
+      <a href="demo.html">Demo</a>
+      <a href="security.html">Security</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">System design</span>
+    <h1>Architecture</h1>
+    <p class="lead">PulseGuard separates traffic generation, telemetry, detection, investigation, policy, automation, and verification so each decision boundary is visible and testable.</p>
+  </div>
+</section>
+
+<section class="section compact">
+  <div class="container architecture">
+    <div class="arch-row">
+      <div class="arch-label">Signal and load</div>
+      <div class="arch-nodes">
+        <span class="node">Wikimedia EventStreams</span>
+        <span class="node">Wikimedia Adapter :8093</span>
+        <span class="node">Load Generator / Locust :8089</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Business path</div>
+      <div class="arch-nodes">
+        <span class="node">Checkout Service :8080</span>
+        <span class="node">Payment Router</span>
+        <span class="node">Payment Node 1</span>
+        <span class="node">Payment Node 2</span>
+        <span class="node">Payment Node 3</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Controlled faults</div>
+      <div class="arch-nodes">
+        <span class="node">Scenario Controller</span>
+        <span class="node">Toxiproxy :8474</span>
+        <span class="node">Corruption Adapter :8094</span>
+        <span class="node">External Auth Service :8099</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Observability</div>
+      <div class="arch-nodes">
+        <span class="node">Prometheus :9090</span>
+        <span class="node">Grafana :3000</span>
+        <span class="node">Detector / Predictor</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Agentic control</div>
+      <div class="arch-nodes">
+        <span class="node">Incident Console :8095</span>
+        <span class="node">Investigation Agent :8096</span>
+        <span class="node">Automation Service :8097</span>
+        <span class="node optional">Azure OpenAI - optional</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container grid two">
+    <article class="card">
+      <h2>Evidence path</h2>
+      <ol class="list-clean">
+        <li>Services expose metrics and health signals.</li>
+        <li>Prometheus stores the observed state.</li>
+        <li>Detection logic confirms an operational symptom.</li>
+        <li>The incident record becomes the investigation boundary.</li>
+        <li>The agent receives telemetry summaries, topology, and bounded context.</li>
+        <li>The recommendation includes evidence and uncertainty.</li>
+      </ol>
+    </article>
+    <article class="card">
+      <h2>Action path</h2>
+      <ol class="list-clean">
+        <li>Policy evaluates the proposed action.</li>
+        <li>Denied or human-only actions stop.</li>
+        <li>Approval-required actions wait for authorization.</li>
+        <li>The automation service executes an allowlisted action.</li>
+        <li>Telemetry verifies recovery.</li>
+        <li>The incident resolves or is assigned to support.</li>
+      </ol>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Public and internal naming</h2>
+    <div class="callout">
+      <strong>PulseGuard</strong> is the public product name. Existing internal names beginning with <code>opsai-</code> remain in Docker services, images, metrics, and APIs to avoid a risky compatibility migration.
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <span>PulseGuard - Predict failures. Protect reliability.</span>
+    <span>Portfolio proof of concept | <span data-year></span></span>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

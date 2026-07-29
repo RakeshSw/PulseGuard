@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security | PulseGuard</title>
+  <meta name="description" content="PulseGuard security, AI, policy, and automation boundaries.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">P</span>
+      <span>PulseGuard</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="demo.html">Demo</a>
+      <a href="security.html" aria-current="page">Security</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">Trust boundaries</span>
+    <h1>Security and AI boundaries</h1>
+    <p class="lead">PulseGuard is designed to demonstrate controlled agentic behavior. Model output is advisory until policy, authorization, execution, and verification agree.</p>
+  </div>
+</section>
+
+<section class="section compact">
+  <div class="container grid three">
+    <article class="card">
+      <h3>Bounded evidence</h3>
+      <p>The agent receives incident facts, telemetry summaries, topology, and transparent knowledge rather than unrestricted logs and host access.</p>
+    </article>
+    <article class="card">
+      <h3>Bounded authority</h3>
+      <p>Only allowlisted actions can move to automation. Approval-required and human-only decisions stop at the policy boundary.</p>
+    </article>
+    <article class="card">
+      <h3>Observed recovery</h3>
+      <p>An action is not considered successful until service telemetry confirms recovery.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container grid two">
+    <article class="card">
+      <h2>Allowed investigation context</h2>
+      <ul class="list-clean">
+        <li>incident metadata</li>
+        <li>latency, error, availability, and saturation summaries</li>
+        <li>service topology and dependencies</li>
+        <li>bounded automation state</li>
+        <li>curated local operational knowledge</li>
+        <li>aggregate public traffic indicators</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h2>Excluded context</h2>
+      <ul class="list-clean">
+        <li>credentials and environment dumps</li>
+        <li>raw Wikimedia event payloads</li>
+        <li>scenario-controller ground truth</li>
+        <li>unrelated logs and incidents</li>
+        <li>customer, personal, or corporate data</li>
+        <li>unrestricted infrastructure control</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Policy outcomes</h2>
+    <table>
+      <thead>
+        <tr><th>Outcome</th><th>Meaning</th><th>Next step</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Automatic</td><td>Low-risk allowlisted action</td><td>Execute and verify</td></tr>
+        <tr><td>Approval required</td><td>Action is allowed but needs explicit authorization</td><td>Wait, then execute and verify</td></tr>
+        <tr><td>Human only</td><td>Automation is inappropriate</td><td>Prepare support handoff</td></tr>
+        <tr><td>Denied</td><td>Action violates policy or lacks evidence</td><td>Stop and record rationale</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="callout danger">
+      Fault injection and load generation must remain inside an isolated environment that you own or are authorized to test. PulseGuard is not a production safety control.
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <span>PulseGuard - Predict failures. Protect reliability.</span>
+    <span>Portfolio proof of concept | <span data-year></span></span>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

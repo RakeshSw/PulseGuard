@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Overview | PulseGuard</title>
+  <meta name="description" content="PulseGuard agentic reliability engineering proof of concept.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">P</span>
+      <span>PulseGuard</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html" aria-current="page">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="demo.html">Demo</a>
+      <a href="security.html">Security</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">Agentic reliability engineering</span>
+    <h1>Predict failures. Protect reliability.</h1>
+    <p class="lead">PulseGuard turns live operational signals into a governed incident-response loop: observe, detect, investigate, decide, act, verify, and either resolve or hand off.</p>
+    <div class="hero-actions">
+      <a class="button primary" href="demo.html">Explore the demo</a>
+      <a class="button" href="architecture.html">See the architecture</a>
+    </div>
+  </div>
+</section>
+
+<section class="section compact">
+  <div class="container grid three">
+    <article class="card">
+      <div class="metric">Live</div>
+      <h3>Operational signal</h3>
+      <p>Wikimedia EventStreams changes the intensity of local synthetic checkout traffic without forwarding raw public-event content.</p>
+    </article>
+    <article class="card">
+      <div class="metric">Bounded</div>
+      <h3>AI investigation</h3>
+      <p>The agent receives telemetry, topology, incident facts, and transparent local knowledge rather than unrestricted infrastructure access.</p>
+    </article>
+    <article class="card">
+      <div class="metric">Governed</div>
+      <h3>Automation</h3>
+      <p>Allowlisted actions pass through policy, approval where required, and telemetry-based recovery verification.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="kicker">The loop</span>
+      <h2>A complete incident lifecycle, not just a chatbot</h2>
+      <p>PulseGuard demonstrates the control points required to move from detection to accountable action.</p>
+    </div>
+    <div class="flow" aria-label="PulseGuard incident lifecycle">
+      <div class="flow-step"><strong>01 Observe</strong>Collect service and traffic telemetry.</div>
+      <div class="flow-step"><strong>02 Detect</strong>Confirm abnormal latency, errors, or availability.</div>
+      <div class="flow-step"><strong>03 Investigate</strong>Correlate bounded evidence and topology.</div>
+      <div class="flow-step"><strong>04 Decide</strong>Recommend a specific response with rationale.</div>
+      <div class="flow-step"><strong>05 Govern</strong>Apply allowlist and approval policy.</div>
+      <div class="flow-step"><strong>06 Act</strong>Execute the approved controlled action.</div>
+      <div class="flow-step"><strong>07 Verify</strong>Measure recovery from telemetry.</div>
+      <div class="flow-step"><strong>08 Resolve</strong>Close or assign to support with evidence.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container grid two">
+    <article class="card">
+      <span class="kicker">Public demo</span>
+      <h2>Built for explainability</h2>
+      <p>Incident evidence, provider selection, proposed action, policy result, execution status, verification, assignment, and resolution remain visible in the UI.</p>
+      <a class="button" href="demo.html">Walk through a scenario</a>
+    </article>
+    <article class="card">
+      <span class="kicker">Safety</span>
+      <h2>Designed to stop safely</h2>
+      <p>PulseGuard does not treat model output as authority. It uses bounded context, allowlisted actions, explicit approval, and observed recovery.</p>
+      <a class="button" href="security.html">Review the boundaries</a>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="kicker">Run locally</span>
+      <h2>Docker Compose quick start</h2>
+    </div>
+    <pre id="quickstart"><code>Copy-Item .env.example .env
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps</code></pre>
+    <button class="button" type="button" data-copy="#quickstart">Copy commands</button>
+    <div class="callout warning" style="margin-top:1rem">
+      This is a local portfolio proof of concept. Do not point fault injection or load generation at systems you do not own or have permission to test.
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <span>PulseGuard - Predict failures. Protect reliability.</span>
+    <span>Portfolio proof of concept | <span data-year></span></span>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

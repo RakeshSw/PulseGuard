@@ -1,0 +1,60 @@
+{
+  "package": "PulseGuard-Complete-Clean-Source-1.0.1-poc.zip",
+  "created_utc": "2026-07-29T14:53:47.054200+00:00",
+  "source_upload": "opsai-commander-day4(1).zip",
+  "source_upload_sha256": "58540940D836BBCC2FF7E15891F1894768340D754191C4DA5F2C7ECC643D2C53",
+  "source_file_count": 90,
+  "clean_package_file_count": 128,
+  "compose_service_count": 18,
+  "original_source_files_retained": true,
+  "security_hardening": {
+    "shared_automation_token_fallbacks_removed": "PASS",
+    "shared_partner_token_fallbacks_removed": "PASS",
+    "database_connection_fallbacks_removed": "PASS",
+    "required_service_configuration_fails_closed": "PASS",
+    "blank_template_secrets_generated_locally": "PASS",
+    "embedded_secret_scan": "PASS"
+  },
+  "static_validation": {
+    "zip_path_safety": "PASS",
+    "runtime_data_excluded": "PASS",
+    "local_env_and_secret_files_excluded": "PASS",
+    "private_windows_paths_and_company_references": "PASS",
+    "rejected_public_branding": "PASS",
+    "encoding_mojibake_scan": "PASS",
+    "python_syntax": "PASS",
+    "python_service_imports_with_required_configuration": "PASS",
+    "python_fail_closed_imports_without_required_configuration": "PASS",
+    "json_parse": "PASS",
+    "yaml_parse": "PASS",
+    "javascript_syntax": "PASS",
+    "html_and_markdown_local_links": "PASS",
+    "compose_structure_and_build_contexts": "PASS",
+    "powershell_structural_checks": "PASS"
+  },
+  "docker_e2e": {
+    "status": "NOT_EXECUTED_IN_ARTIFACT_ENVIRONMENT",
+    "reason": "Docker engine is not available in the artifact execution environment.",
+    "local_runner": "RUN-DOCKER-E2E.cmd",
+    "powershell_runner": "scripts/test-pulseguard-public-release-e2e.ps1",
+    "ci_workflow": ".github/workflows/docker-e2e.yml",
+    "coverage": [
+      "no-cache build of all services",
+      "all endpoint and container health checks",
+      "public branding and secret exposure checks",
+      "detection and incident persistence",
+      "AI or deterministic investigation",
+      "policy and approval flow",
+      "credential auto-repair",
+      "disk and certificate auto-repair",
+      "recovery verification"
+    ],
+    "cleanup": "Use -CleanAfterTest or RUN-DOCKER-E2E.cmd to remove generated runtime and .env after validation."
+  },
+  "notes": [
+    "Public product branding is PulseGuard.",
+    "Internal opsai-* identifiers are retained for Docker, metrics, APIs, and test compatibility.",
+    "No .env file or real credential is included.",
+    "The package must not be described as Docker-E2E-passed until the included runner completes successfully on a Docker-enabled machine."
+  ]
+}

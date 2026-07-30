@@ -339,7 +339,9 @@ try {
         -Required @(
             "PulseGuard Incident Console",
             "Live traffic signal",
-            "http://localhost:8097/widget.js"
+            "function pulseGuardServiceUrl",
+            "pulseGuardServiceUrl(8097,'/widget.js')",
+            "loadPulseGuardWidget();"
         ) `
         -Forbidden @(
             "OpsAI Incident Console",
@@ -351,7 +353,9 @@ try {
         -Required @(
             "PulseGuard Investigation",
             "Evidence-bounded PulseGuard investigation",
-            "http://localhost:8097/widget.js"
+            "function pulseGuardServiceUrl",
+            "pulseGuardServiceUrl(8097,'/widget.js')",
+            "loadPulseGuardWidget();"
         ) `
         -Forbidden @("OpsAI Live Activity")
 

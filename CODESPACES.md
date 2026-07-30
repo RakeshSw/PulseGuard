@@ -1,13 +1,13 @@
 # Run PulseGuard in GitHub Codespaces
 
-GitHub Codespaces can run the complete PulseGuard Docker Compose environment in a browser-hosted Linux development machine. The repository configuration requests at least 8 CPU cores, 16 GB RAM, and 32 GB storage because the demo builds and runs 18 services.
+GitHub Codespaces can run the complete PulseGuard Docker Compose environment in a browser-hosted Linux development machine. Select the highest-capacity machine type available to your account, preferably 4 cores or more, because the demo builds and runs 18 services.
 
 ## Create the Codespace
 
 1. Open the PulseGuard repository on GitHub.
 2. Select **Code** and then **Codespaces**.
-3. Select **Create codespace on main**. If GitHub shows machine options, choose an 8-core or larger machine.
-4. Wait for the browser editor and terminal to finish loading.
+3. Select **Create codespace on main**. If GitHub shows multiple machine options, choose the highest-capacity option available.
+4. 4. Wait for the browser editor and terminal to finish loading.
 
 The configuration installs Docker-in-Docker and forwards the primary PulseGuard ports. The services do not start automatically, which avoids consuming compute until you are ready to demonstrate them.
 

@@ -330,14 +330,37 @@ try {
     $Results.Add("PASS: every Compose service running and healthy")
 
     Write-Section "Validating UI branding and secret exposure"
+
+    # Invoke-WebRequest validates the server-rendered HTML only. The shared
+    # activity widget is injected by widget.js at browser runtime, so validate
+    # the static pages and the widget asset separately.
     Assert-PageText `
         -Uri "http://localhost:8095/" `
-        -Required @("PulseGuard Incident Console", "PulseGuard Live Activity") `
-        -Forbidden @("OpsAI Incident Console", "OpsAI Live Activity")
+        -Required @(
+            "PulseGuard Incident Console",
+            "Live traffic signal",
+            "http://localhost:8097/widget.js"
+        ) `
+        -Forbidden @(
+            "OpsAI Incident Console",
+            "OpsAI Live Activity"
+        )
 
     Assert-PageText `
         -Uri "http://localhost:8096/" `
-        -Required @("PulseGuard Investigation", "PulseGuard Live Activity") `
+        -Required @(
+            "PulseGuard Investigation",
+            "Evidence-bounded PulseGuard investigation",
+            "http://localhost:8097/widget.js"
+        ) `
+        -Forbidden @("OpsAI Live Activity")
+
+    Assert-PageText `
+        -Uri "http://localhost:8097/widget.js" `
+        -Required @(
+            "PulseGuard Live Activity",
+            "PulseGuard separates recommendation, governance, action execution"
+        ) `
         -Forbidden @("OpsAI Live Activity")
 
     $ExternalHealth = Invoke-RestMethod -Uri "http://localhost:8099/health" -TimeoutSec 20

@@ -1,5 +1,5 @@
 # PulseGuard
-
+[![Docker E2E](https://github.com/RakeshSw/PulseGuard/actions/workflows/docker-e2e.yml/badge.svg?branch=main)](https://github.com/RakeshSw/PulseGuard/actions/workflows/docker-e2e.yml)
 **Predict failures. Protect reliability.**
 
 PulseGuard is an agentic reliability engineering proof of concept that turns live operational signals into a governed incident-response workflow. It generates realistic local checkout traffic, observes service telemetry, detects operational risk, investigates incidents with bounded evidence, recommends a response, applies deterministic policy, executes only allowlisted actions, verifies recovery, and prepares support handoffs when human intervention is required.

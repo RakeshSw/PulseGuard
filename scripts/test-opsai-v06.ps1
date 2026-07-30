@@ -63,10 +63,20 @@ else {
     Write-Host ("[PASS] Real AI ready: {0} / {1}" -f $Agent.provider, $Agent.analysisMode) -ForegroundColor Green
 }
 
-if ($Predictor.mode -ne 'DETERMINISTIC_FORECAST_WITH_AI_EXPLANATION') {
-    throw "Unexpected predictor mode: $($Predictor.mode)"
+$ExpectedPredictorMode = 'PROMETHEUS_RANGE_FORECAST_WITH_EVENT_DRIVEN_AI'
+if ($Predictor.mode -ne $ExpectedPredictorMode) {
+    throw "Unexpected predictor mode: $($Predictor.mode). Expected: $ExpectedPredictorMode"
 }
-Write-Host '[PASS] Predictor calculates forecasts deterministically and uses AI only for explanation' -ForegroundColor Green
+if ($Predictor.dataSourceMode -ne 'PROMETHEUS_RANGE_QUERIES') {
+    throw "Unexpected predictor data source mode: $($Predictor.dataSourceMode)"
+}
+if ($Predictor.continuousMetricsToAi -ne $false) {
+    throw 'Predictor must not send continuous metrics to AI.'
+}
+if ($Predictor.aiContactMode -ne 'NEW_DETERMINISTIC_TRIGGER_ONLY') {
+    throw "Unexpected predictor AI contact mode: $($Predictor.aiContactMode)"
+}
+Write-Host '[PASS] Predictor uses deterministic Prometheus range forecasts and event-driven AI explanations only' -ForegroundColor Green
 
 $PredictorSummary = Invoke-RestMethod -Uri 'http://localhost:8098/summary' -TimeoutSec 20
 if ($null -eq $PredictorSummary.activePredictions -or $null -eq $PredictorSummary.totalPredictions) {

@@ -1,17 +1,13 @@
 {
   "name": "PulseGuard Browser Demo",
-
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
-
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {
       "version": "latest",
       "moby": true,
       "dockerDashComposeVersion": "v2"
-    },
-    "ghcr.io/devcontainers/features/powershell:1": {}
+    }
   },
-
   "forwardPorts": [
     3000,
     8080,
@@ -28,7 +24,6 @@
     8474,
     9090
   ],
-
   "portsAttributes": {
     "8095": {
       "label": "PulseGuard Incident Console",
@@ -63,10 +58,8 @@
       "onAutoForward": "silent"
     }
   },
-
   "postCreateCommand": "bash .devcontainer/bootstrap.sh",
   "postAttachCommand": "bash .devcontainer/show-demo-urls.sh",
-
   "customizations": {
     "vscode": {
       "extensions": [

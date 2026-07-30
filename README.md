@@ -63,6 +63,72 @@ The public product name is **PulseGuard**. Internal identifiers beginning with `
 PulseGuard can run entirely in a browser-hosted GitHub Codespace, including all 18 Docker Compose services. The Codespaces configuration installs Docker-in-Docker, forwards the demo ports privately, and supports both deterministic mock and optional real-AI investigation modes.
 
 See [CODESPACES.md](CODESPACES.md) for creation, startup, secret configuration, port access, shutdown, and cleanup instructions.
+
+## Application screenshots
+
+### Locust synthetic traffic generator
+
+<img
+  width="1520"
+  height="941"
+  alt="PulseGuard Locust load generator showing synthetic checkout traffic, active users, request rates, response times, and failures"
+  src="https://github.com/user-attachments/assets/dcdb7102-6e0e-4334-ae51-a14fd90b6feb"
+/>
+
+### Grafana observability dashboard
+
+<img
+  width="1892"
+  height="799"
+  alt="PulseGuard Grafana dashboard showing payment-node latency, service health, operational metrics, and incident thresholds"
+  src="https://github.com/user-attachments/assets/301270f8-8ed9-4bb5-b2d3-5d608d569715"
+/>
+
+### Controlled scenario controller
+
+<img
+  width="1089"
+  height="935"
+  alt="PulseGuard Scenario Controller for injecting payment latency, service failures, authentication problems, and other controlled operational faults"
+  src="https://github.com/user-attachments/assets/f7283e4a-afb4-43ff-8a3e-f6dea8bb882a"
+/>
+
+### Incident lifecycle console
+
+<img
+  width="1211"
+  height="884"
+  alt="PulseGuard Incident Console showing detected incidents, affected services, severity, investigation status, remediation, and recovery outcome"
+  src="https://github.com/user-attachments/assets/5bb9bfbb-77ed-45f8-900d-33824560a8ff"
+/>
+
+### AI investigation console
+
+<img
+  width="1269"
+  height="840"
+  alt="PulseGuard AI Investigation Console showing evidence-bounded Azure OpenAI analysis, probable root cause, confidence, and recommended action"
+  src="https://github.com/user-attachments/assets/7cf9c3ba-2b3c-405f-908b-14e768ba6b79"
+/>
+
+### Governed automation activity
+
+<img
+  width="395"
+  height="696"
+  alt="PulseGuard Live Activity panel showing policy decisions, allowlisted remediation actions, execution status, and recovery verification"
+  src="https://github.com/user-attachments/assets/876bc640-fc0b-4199-9107-6e5b0a8d2d0b"
+/>
+
+### Predictive reliability analysis
+
+<img
+  width="1588"
+  height="911"
+  alt="PulseGuard Predictive Analysis console showing Prometheus-based forecasts, future reliability risks, deterministic triggers, and AI explanations"
+  src="https://github.com/user-attachments/assets/3acf4f58-1e71-4846-86c9-b8a88239a9cd"
+/>
+
 ## Prerequisites
 
 - Windows 10/11 or another Docker-capable operating system
@@ -71,15 +137,7 @@ See [CODESPACES.md](CODESPACES.md) for creation, startup, secret configuration, 
 - Sufficient CPU and memory for 18 Compose services; allocating approximately 8 GB to Docker is a practical starting point
 - Optional OpenAI or Azure OpenAI access for the real-AI investigation path
 
-##Screenshots of the applications hosted - 
 
-- Locust Load Generator <img width="1520" height="941" alt="image" src="https://github.com/user-attachments/assets/dcdb7102-6e0e-4334-ae51-a14fd90b6feb" />
-- Grafana Dashboard <img width="1892" height="799" alt="image" src="https://github.com/user-attachments/assets/301270f8-8ed9-4bb5-b2d3-5d608d569715" />
-- Scenario Controller <img width="1089" height="935" alt="image" src="https://github.com/user-attachments/assets/f7283e4a-afb4-43ff-8a3e-f6dea8bb882a" />
-- Incident Console <img width="1211" height="884" alt="image" src="https://github.com/user-attachments/assets/5bb9bfbb-77ed-45f8-900d-33824560a8ff" />
-- Investigation Console <img width="1269" height="840" alt="image" src="https://github.com/user-attachments/assets/7cf9c3ba-2b3c-405f-908b-14e768ba6b79" />
-- PulseGuard Live Activity <img width="395" height="696" alt="image" src="https://github.com/user-attachments/assets/876bc640-fc0b-4199-9107-6e5b0a8d2d0b" />
-- Predictive Analysis <img width="1588" height="911" alt="image" src="https://github.com/user-attachments/assets/3acf4f58-1e71-4846-86c9-b8a88239a9cd" />
 
 ## Windows quick start
 

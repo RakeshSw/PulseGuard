@@ -71,6 +71,16 @@ See [CODESPACES.md](CODESPACES.md) for creation, startup, secret configuration, 
 - Sufficient CPU and memory for 18 Compose services; allocating approximately 8 GB to Docker is a practical starting point
 - Optional OpenAI or Azure OpenAI access for the real-AI investigation path
 
+##Screenshots of the applications hosted - 
+
+- Locust Load Generator <img width="1520" height="941" alt="image" src="https://github.com/user-attachments/assets/dcdb7102-6e0e-4334-ae51-a14fd90b6feb" />
+- Grafana Dashboard <img width="1892" height="799" alt="image" src="https://github.com/user-attachments/assets/301270f8-8ed9-4bb5-b2d3-5d608d569715" />
+- Scenario Controller <img width="1089" height="935" alt="image" src="https://github.com/user-attachments/assets/f7283e4a-afb4-43ff-8a3e-f6dea8bb882a" />
+- Incident Console <img width="1211" height="884" alt="image" src="https://github.com/user-attachments/assets/5bb9bfbb-77ed-45f8-900d-33824560a8ff" />
+- Investigation Console <img width="1269" height="840" alt="image" src="https://github.com/user-attachments/assets/7cf9c3ba-2b3c-405f-908b-14e768ba6b79" />
+- PulseGuard Live Activity <img width="395" height="696" alt="image" src="https://github.com/user-attachments/assets/876bc640-fc0b-4199-9107-6e5b0a8d2d0b" />
+- Predictive Analysis <img width="1588" height="911" alt="image" src="https://github.com/user-attachments/assets/3acf4f58-1e71-4846-86c9-b8a88239a9cd" />
+
 ## Windows quick start
 
 Extract the ZIP, open PowerShell in the extracted `PulseGuard-1.0.1-poc` directory, then run:

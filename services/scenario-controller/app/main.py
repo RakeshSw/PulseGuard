@@ -1582,6 +1582,21 @@ async def control_page() -> str:
   </section>
 
 <script>
+function pulseGuardServiceUrl(port,path='') {
+  const host=window.location.hostname;
+  if(host.endsWith('.app.github.dev')) {
+    const parts=host.split('.');
+    parts[0]=parts[0].replace(/-\\d+$/,`-${port}`);
+    return `${window.location.protocol}//${parts.join('.')}${path}`;
+  }
+  return `http://localhost:${port}${path}`;
+}
+function loadPulseGuardWidget() {
+  const script=document.createElement('script');
+  script.src=pulseGuardServiceUrl(8097,'/widget.js');
+  script.crossOrigin='use-credentials';
+  document.body.appendChild(script);
+}
 let selectedRunId=null;
 let latestRuns=[];
 let activeRun=null;
@@ -1719,7 +1734,7 @@ setInterval(refreshState,2000);
 setInterval(()=>refreshTestRuns(false),2500);
 refreshState(); refreshTestRuns(true);
 </script>
-<script src="http://localhost:8097/widget.js"></script>
+<script>loadPulseGuardWidget();</script>
 </main></body></html>
 """
 

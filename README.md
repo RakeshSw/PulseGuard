@@ -58,6 +58,11 @@ flowchart LR
 
 The public product name is **PulseGuard**. Internal identifiers beginning with `opsai-` or `OPSAI_` are retained for compatibility across Docker service names, images, metrics, APIs, persisted volumes, and tests.
 
+## Browser demo with GitHub Codespaces
+
+PulseGuard can run entirely in a browser-hosted GitHub Codespace, including all 18 Docker Compose services. The Codespaces configuration installs Docker-in-Docker, forwards the demo ports privately, and supports both deterministic mock and optional real-AI investigation modes.
+
+See [CODESPACES.md](CODESPACES.md) for creation, startup, secret configuration, port access, shutdown, and cleanup instructions.
 ## Prerequisites
 
 - Windows 10/11 or another Docker-capable operating system

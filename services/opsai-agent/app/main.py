@@ -1937,6 +1937,21 @@ button{background:#0284c7;color:white;border:0;border-radius:8px;padding:8px 12p
   <div id="content" class="grid"><div class="card">Loading investigations...</div></div>
 </div>
 <script>
+function pulseGuardServiceUrl(port,path='') {
+  const host=window.location.hostname;
+  if(host.endsWith('.app.github.dev')) {
+    const parts=host.split('.');
+    parts[0]=parts[0].replace(/-\\d+$/,`-${port}`);
+    return `${window.location.protocol}//${parts.join('.')}${path}`;
+  }
+  return `http://localhost:${port}${path}`;
+}
+function loadPulseGuardWidget() {
+  const script=document.createElement('script');
+  script.src=pulseGuardServiceUrl(8097,'/widget.js');
+  script.crossOrigin='use-credentials';
+  document.body.appendChild(script);
+}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function rerun(id){await fetch('/api/investigations/'+id+'/rerun',{method:'POST'});setTimeout(load,1000)}
 function render(i){
@@ -1955,6 +1970,6 @@ async function load(){
 }
 load();setInterval(load,5000);
 </script>
-<script src="http://localhost:8097/widget.js"></script>
+<script>loadPulseGuardWidget();</script>
 </body>
 </html>"""

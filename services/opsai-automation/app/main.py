@@ -97,8 +97,13 @@ AUTO_REPAIRED = Gauge(
 app = FastAPI(title="PulseGuard Automation, Activity and Support", version=SERVICE_VERSION)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[
+        "http://localhost:8090",
+        "http://localhost:8095",
+        "http://localhost:8096",
+    ],
+    allow_origin_regex=r"https://.*\.app\.github\.dev",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -2239,7 +2244,7 @@ WIDGET_JS = r'''
 (() => {
   if (window.__opsaiLiveActivityLoaded) return;
   window.__opsaiLiveActivityLoaded = true;
-  const BASE = 'http://localhost:8097';
+  const BASE = new URL(document.currentScript.src, window.location.href).origin;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const style = document.createElement('style');
   style.textContent = `
@@ -2292,18 +2297,18 @@ WIDGET_JS = r'''
     if(!userReading) feed.scrollTop=0;
   }
   async function ticketAction(id, action){
-    await fetch(`${BASE}/tickets/${id}/${action}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor:'demo-operator',note:'Actioned from PulseGuard Live Activity'})});
+    await fetch(`${BASE}/tickets/${id}/${action}`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor:'demo-operator',note:'Actioned from PulseGuard Live Activity'})});
     await refresh();
   }
   async function refresh(){
     try{
-      const [s,a]=await Promise.all([fetch(`${BASE}/summary`).then(r=>r.json()),fetch(`${BASE}/activity?limit=250`).then(r=>r.json())]);
+      const [s,a]=await Promise.all([fetch(`${BASE}/summary`,{credentials:'include'}).then(r=>r.json()),fetch(`${BASE}/activity?limit=250`,{credentials:'include'}).then(r=>r.json())]);
       summary=s;events=a.activities||[];render();
       window.dispatchEvent(new CustomEvent('opsai-summary-updated',{detail:summary}));
     }catch(error){document.getElementById('opsai-live-count').textContent='Activity unavailable';}
   }
   try{
-    const source=new EventSource(`${BASE}/activity/stream`);
+    const source=new EventSource(`${BASE}/activity/stream`,{withCredentials:true});
     source.addEventListener('opsai-activity',event=>{try{events.push(JSON.parse(event.data));events=events.slice(-300);refresh();}catch(_){}});
   }catch(_){ }
   refresh();setInterval(refresh,5000);

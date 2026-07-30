@@ -1,0 +1,80 @@
+{
+  "name": "PulseGuard Browser Demo",
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    }
+  },
+  "hostRequirements": {
+    "cpus": 8,
+    "memory": "16gb",
+    "storage": "32gb"
+  },
+  "forwardPorts": [
+    3000,
+    8080,
+    8081,
+    8089,
+    8090,
+    8093,
+    8094,
+    8095,
+    8096,
+    8097,
+    8098,
+    8099,
+    8474,
+    9090
+  ],
+  "portsAttributes": {
+    "8095": {
+      "label": "PulseGuard Incident Console",
+      "onAutoForward": "openBrowser"
+    },
+    "8096": {
+      "label": "PulseGuard Investigation",
+      "onAutoForward": "notify"
+    },
+    "8090": {
+      "label": "Scenario Controller",
+      "onAutoForward": "notify"
+    },
+    "8097": {
+      "label": "Automation and Live Activity",
+      "onAutoForward": "silent"
+    },
+    "8098": {
+      "label": "Predictive Console",
+      "onAutoForward": "notify"
+    },
+    "8089": {
+      "label": "Locust",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Grafana",
+      "onAutoForward": "notify"
+    },
+    "9090": {
+      "label": "Prometheus",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/bootstrap.sh",
+  "postAttachCommand": "bash .devcontainer/show-demo-urls.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-vscode.powershell"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

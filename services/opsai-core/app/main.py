@@ -2492,6 +2492,21 @@ pre{white-space:pre-wrap;word-break:break-word;background:#07101d;border:1px sol
 </div>
 </main>
 <script>
+function pulseGuardServiceUrl(port,path='') {
+  const host=window.location.hostname;
+  if(host.endsWith('.app.github.dev')) {
+    const parts=host.split('.');
+    parts[0]=parts[0].replace(/-\\d+$/,`-${port}`);
+    return `${window.location.protocol}//${parts.join('.')}${path}`;
+  }
+  return `http://localhost:${port}${path}`;
+}
+function loadPulseGuardWidget() {
+  const script=document.createElement('script');
+  script.src=pulseGuardServiceUrl(8097,'/widget.js');
+  script.crossOrigin='use-credentials';
+  document.body.appendChild(script);
+}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtTime=v=>v?new Date(v).toLocaleString():'-';
 const pretty=v=>JSON.stringify(v??{},null,2);
@@ -2557,7 +2572,7 @@ function supportHandoffHtml(operations){
 }
 async function supportTicketAction(id,action,queue){
  const body={actor:'demo-operator',note:`${action} from Incident Console`};if(queue)body.queue=queue;
- const response=await fetch(`http://localhost:8097/tickets/${id}/${action}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+ const response=await fetch(pulseGuardServiceUrl(8097,`/tickets/${id}/${action}`),{method:'POST',credentials:'include',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
  if(!response.ok)alert('Support action failed: '+await response.text());else await showDetail(id,true);
 }
 async function showDetail(id,preservePosition=false){
@@ -2599,7 +2614,7 @@ async function toggleInvestigation(id){if(String(openIncidentId)===String(id)&&d
 async function refresh(){
  if(refreshInProgress)return;refreshInProgress=true;
  try{
-  const [all,health,traffic,automation,ticketPayload]=await Promise.all([fetch('/incidents?status=all&limit=50').then(r=>r.json()),fetch('/health').then(r=>r.json()),fetch('/traffic/profile').then(r=>r.json()),fetch('http://localhost:8097/summary').then(r=>r.json()).catch(()=>({})),fetch('http://localhost:8097/tickets').then(r=>r.json()).catch(()=>({tickets:[]}))]);
+  const [all,health,traffic,automation,ticketPayload]=await Promise.all([fetch('/incidents?status=all&limit=50').then(r=>r.json()),fetch('/health').then(r=>r.json()),fetch('/traffic/profile').then(r=>r.json()),fetch(pulseGuardServiceUrl(8097,'/summary'),{credentials:'include'}).then(r=>r.json()).catch(()=>({})),fetch(pulseGuardServiceUrl(8097,'/tickets'),{credentials:'include'}).then(r=>r.json()).catch(()=>({tickets:[]}))]);
   const active=all.incidents.filter(x=>x.status==='OPEN'||x.status==='ACKNOWLEDGED');const resolved=all.incidents.filter(x=>x.status==='RESOLVED');const ticketMap=Object.fromEntries((ticketPayload.tickets||[]).map(t=>[String(t.incidentId),t]));
   document.getElementById('active').textContent=active.length;document.getElementById('autoRepaired').textContent=automation.autoRepaired??0;document.getElementById('awaitingApproval').textContent=automation.awaitingApproval??0;document.getElementById('assignedSupport').textContent=automation.assignedToSupport??0;document.getElementById('resolved').textContent=resolved.length;document.getElementById('health').textContent=health.status;renderTraffic(traffic);
   const nextSignature=JSON.stringify(all.incidents.map(x=>{const t=ticketMap[String(x.id)]||{};return [x.id,x.status,x.updated_at,(x.evidence||{}).observed,(x.evidence||{}).threshold,x.resolution_action,x.resolution_execution_status,x.repair_outcome,x.resolution_reason,t.primaryQueue,t.status,t.acknowledgedBy,t.updatedAt];}));
@@ -2624,5 +2639,5 @@ async function refresh(){
 document.getElementById('refreshTraffic').onclick=refreshTraffic;
 refresh();setInterval(refresh,5000);
 </script>
-<script src="http://localhost:8097/widget.js"></script>
+<script>loadPulseGuardWidget();</script>
 </body></html>"""

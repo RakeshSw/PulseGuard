@@ -7,7 +7,7 @@ GitHub Codespaces can run the complete PulseGuard Docker Compose environment in 
 1. Open the PulseGuard repository on GitHub.
 2. Select **Code** and then **Codespaces**.
 3. Select **Create codespace on main**. If GitHub shows multiple machine options, choose the highest-capacity option available.
-4. 4. Wait for the browser editor and terminal to finish loading.
+4. Wait for the browser editor and terminal to finish loading.
 
 The configuration installs Docker-in-Docker and forwards the primary PulseGuard ports. The services do not start automatically, which avoids consuming compute until you are ready to demonstrate them.
 
@@ -16,7 +16,7 @@ The configuration installs Docker-in-Docker and forwards the primary PulseGuard 
 In the Codespaces terminal, run:
 
 ```bash
-bash .devcontainer/start-pulseguard.sh
+bash .devcontainer/demo-start.sh
 ```
 
 The first run builds every image from source and can take several minutes. When startup completes, Codespaces opens the Incident Console automatically. You can also use the **Ports** tab to open:

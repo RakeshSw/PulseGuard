@@ -49,7 +49,7 @@ $RequiredSecrets = @(
 
 $SecretsChanged = $false
 foreach ($Name in $RequiredSecrets) {
-    $Pattern = "(?m)^" + [regex]::Escape($Name) + "\s*=\s*(.*)$"
+    $Pattern = "(?m)^" + [regex]::Escape($Name) + "[ \t]*=[ \t]*([^\r\n]*)$"
     $Match = [regex]::Match($EnvText, $Pattern)
     $CurrentValue = if ($Match.Success) { $Match.Groups[1].Value.Trim() } else { "" }
 

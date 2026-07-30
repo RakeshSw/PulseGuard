@@ -8,5 +8,5 @@ chmod +x .devcontainer/*.sh
 
 printf '\nPulseGuard Codespaces environment is ready.\n'
 printf 'Start the full Docker demo with:\n\n'
-printf '  bash .devcontainer/start-pulseguard.sh\n\n'
+printf '  bash .devcontainer/demo-start.sh\n\n'
 printf 'The first build can take several minutes because all services are built from source.\n'

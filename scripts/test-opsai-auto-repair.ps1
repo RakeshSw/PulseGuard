@@ -12,6 +12,36 @@ $Core = 'http://localhost:8095'
 $Agent = 'http://localhost:8096'
 $ScenarioController = 'http://localhost:8090'
 
+function Get-OptionalPropertyValue {
+    param(
+        [Parameter(Mandatory=$false)]
+        [AllowNull()]
+        $InputObject,
+
+        [Parameter(Mandatory=$true)]
+        [string]$Name
+    )
+
+    if ($null -eq $InputObject) {
+        return $null
+    }
+
+    if ($InputObject -is [System.Collections.IDictionary]) {
+        if ($InputObject.Contains($Name)) {
+            return $InputObject[$Name]
+        }
+
+        return $null
+    }
+
+    $Property = $InputObject.PSObject.Properties[$Name]
+    if ($null -eq $Property) {
+        return $null
+    }
+
+    return $Property.Value
+}
+
 function Get-IncidentOutcome {
     param(
         [Parameter(Mandatory=$true)]$Incident,
@@ -19,25 +49,45 @@ function Get-IncidentOutcome {
     )
 
     $outcome = $null
+    $operations = Get-OptionalPropertyValue -InputObject $Detail -Name 'operations'
+    $remediation = Get-OptionalPropertyValue -InputObject $operations -Name 'remediation'
 
-    if ($Detail.operations) {
-        $outcome = $Detail.operations.repairOutcome
-        if (-not $outcome -and $Detail.operations.remediation) {
-            $outcome = $Detail.operations.remediation.repairOutcome
-            if (-not $outcome -and $Detail.operations.remediation.recoveryVerified) {
-                $outcome = 'AUTO_REPAIRED'
-            }
-            if (-not $outcome -and $Detail.operations.remediation.verificationPassed) {
-                $outcome = 'AUTO_REPAIRED_PENDING_CORE_VERIFICATION'
-            }
-            if (-not $outcome -and $Detail.operations.remediation.executed) {
-                $outcome = 'AUTO_ACTION_COMPLETED'
-            }
-        }
+    $outcome = Get-OptionalPropertyValue -InputObject $operations -Name 'repairOutcome'
+
+    if (-not $outcome) {
+        $outcome = Get-OptionalPropertyValue -InputObject $remediation -Name 'repairOutcome'
     }
 
-    if (-not $outcome) { $outcome = $Incident.repair_outcome }
-    if (-not $outcome -and $Incident.evidence) { $outcome = $Incident.evidence.repairOutcome }
+    if (
+        -not $outcome -and
+        (Get-OptionalPropertyValue -InputObject $remediation -Name 'recoveryVerified')
+    ) {
+        $outcome = 'AUTO_REPAIRED'
+    }
+
+    if (
+        -not $outcome -and
+        (Get-OptionalPropertyValue -InputObject $remediation -Name 'verificationPassed')
+    ) {
+        $outcome = 'AUTO_REPAIRED_PENDING_CORE_VERIFICATION'
+    }
+
+    if (
+        -not $outcome -and
+        (Get-OptionalPropertyValue -InputObject $remediation -Name 'executed')
+    ) {
+        $outcome = 'AUTO_ACTION_COMPLETED'
+    }
+
+    if (-not $outcome) {
+        $outcome = Get-OptionalPropertyValue -InputObject $Incident -Name 'repair_outcome'
+    }
+
+    if (-not $outcome) {
+        $evidence = Get-OptionalPropertyValue -InputObject $Incident -Name 'evidence'
+        $outcome = Get-OptionalPropertyValue -InputObject $evidence -Name 'repairOutcome'
+    }
+
     return $outcome
 }
 
@@ -47,16 +97,25 @@ function Get-IncidentAction {
         [Parameter(Mandatory=$true)]$Detail
     )
 
-    if ($Detail.operations -and $Detail.operations.remediation -and $Detail.operations.remediation.action) {
-        return [string]$Detail.operations.remediation.action
+    $operations = Get-OptionalPropertyValue -InputObject $Detail -Name 'operations'
+    $remediation = Get-OptionalPropertyValue -InputObject $operations -Name 'remediation'
+    $action = Get-OptionalPropertyValue -InputObject $remediation -Name 'action'
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$action)) {
+        return [string]$action
     }
 
-    if ($Detail.investigation -and $Detail.investigation.action_name) {
-        return [string]$Detail.investigation.action_name
+    $investigation = Get-OptionalPropertyValue -InputObject $Detail -Name 'investigation'
+    $action = Get-OptionalPropertyValue -InputObject $investigation -Name 'action_name'
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$action)) {
+        return [string]$action
     }
 
-    if ($Incident.resolution_action) {
-        return [string]$Incident.resolution_action
+    $action = Get-OptionalPropertyValue -InputObject $Incident -Name 'resolution_action'
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$action)) {
+        return [string]$action
     }
 
     return ''
@@ -139,8 +198,16 @@ function Wait-ForResult {
         lastAction = $lastAction
         lastOutcome = $lastOutcome
         incident = $lastIncident
-        operations = if ($lastDetail) { $lastDetail.operations } else { $null }
-        investigation = if ($lastDetail) { $lastDetail.investigation } else { $null }
+        operations = if ($lastDetail) {
+            Get-OptionalPropertyValue -InputObject $lastDetail -Name 'operations'
+        } else {
+            $null
+        }
+        investigation = if ($lastDetail) {
+            Get-OptionalPropertyValue -InputObject $lastDetail -Name 'investigation'
+        } else {
+            $null
+        }
     }
 
     $diagnosticPath = Join-Path $HOME (

@@ -64,6 +64,14 @@ PulseGuard can run entirely in a browser-hosted GitHub Codespace, including all 
 
 See [CODESPACES.md](CODESPACES.md) for creation, startup, secret configuration, port access, shutdown, and cleanup instructions.
 
+## Architecture and scenario documentation
+
+- [Platform architecture](docs/architecture.html)
+- [Scenario and event flows](docs/docs/scenario-flows.md)
+- [Demo guide](docs/demo.html)
+- [Security boundaries](docs/security.html)
+- [Project roadmap](docs/roadmap.html)
+
 ## Application screenshots
 
 ### Locust synthetic traffic generator
